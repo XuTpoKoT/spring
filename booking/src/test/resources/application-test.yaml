@@ -1,0 +1,24 @@
+spring:
+  datasource:
+    url: jdbc:h2:mem:booking;MODE=PostgreSQL;DB_CLOSE_DELAY=-1;DATABASE_TO_LOWER=TRUE
+    driver-class-name: org.h2.Driver
+    username: sa
+    password:
+  jpa:
+    hibernate:
+      ddl-auto: validate
+  flyway:
+    enabled: true
+
+app:
+  jwt:
+    secret: test-secret-test-secret-test-secret-123456
+    expiration-seconds: 3600
+    issuer: booking-service-test
+  hotels:
+    base-url: http://localhost:65535
+    connect-timeout: 200ms
+    read-timeout: 500ms
+    max-attempts: 1
+    initial-backoff: 10ms
+    backoff-multiplier: 2.0
