@@ -23,7 +23,7 @@ val openApiOutputDir = layout.buildDirectory.dir("generated/openapi")
 
 openApiGenerate {
 	generatorName.set("spring")
-	inputSpec.set("$projectDir/src/main/resources/openapi.yml")
+	inputSpec.set("$projectDir/src/main/resources/static/openapi.yml")
 	outputDir.set(openApiOutputDir.get().asFile.absolutePath)
 	apiPackage.set("com.example.booking.api")
 	modelPackage.set("com.example.booking.model")
@@ -76,6 +76,8 @@ dependencies {
 	implementation("org.springframework.boot:spring-boot-starter-validation")
 	implementation("org.springframework.boot:spring-boot-starter-actuator")
 	implementation("org.springframework.cloud:spring-cloud-starter-openfeign")
+	implementation("org.springframework.cloud:spring-cloud-starter-netflix-eureka-client")
+	implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:3.2.0")
 
 	implementation("org.springframework.boot:spring-boot-starter-flyway")
 	implementation("org.springframework.boot:spring-boot-h2console")

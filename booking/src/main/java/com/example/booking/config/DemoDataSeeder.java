@@ -35,8 +35,8 @@ public class DemoDataSeeder {
             return;
         }
 
-        User admin = createUser("admin", "admin12345", Role.ADMIN);
-        User user = createUser("user", "user12345", Role.USER);
+        User admin = createUser("admin", "admin", Role.ADMIN);
+        User user = createUser("user", "user", Role.USER);
         users.saveAll(List.of(admin, user));
 
         LocalDate today = LocalDate.now(ZoneOffset.UTC);
@@ -52,7 +52,7 @@ public class DemoDataSeeder {
         );
         bookings.saveAll(demoBookings);
 
-        log.info("Demo data created. Users: admin/admin12345 (ADMIN), user/user12345 (USER)");
+        log.info("Demo data created. Users: admin/admin (ADMIN), user/user (USER)");
         demoBookings.forEach(booking -> log.info(
                 "Seeded booking id={} userId={} roomId={} status={} requestId={}",
                 booking.getId(), booking.getUserId(), booking.getRoomId(),

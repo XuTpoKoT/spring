@@ -5,7 +5,7 @@
 - JDK 25
 - Gradle 9.8.2
 - Доступный hotels-service для полноценного сценария создания бронирования
-  (по умолчанию `http://localhost:8081`)
+  (по умолчанию `http://localhost:8082`)
 
 База данных встроенная: H2 в in-memory режиме. PostgreSQL и отдельный контейнер БД не нужны.
 
@@ -13,15 +13,16 @@
 
 | Переменная | Значение по умолчанию | Назначение |
 |---|---|---|
-| `SERVER_PORT` | `8080` | Порт приложения |
+| `SERVER_PORT` | `8081` | Порт приложения |
 | `DB_URL` | `jdbc:h2:mem:booking;MODE=PostgreSQL;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE` | JDBC URL H2 |
 | `DB_USERNAME` | `sa` | Пользователь H2 |
 | `DB_PASSWORD` | пусто | Пароль H2 |
+| `EUREKA_URL` | `http://localhost:8761/eureka/` | Адрес Eureka Server |
 | `DEMO_SEED_ENABLED` | `true` | Заполнять ли БД демо-данными при старте |
 | `JWT_SECRET` | dev-значение из `application.yaml` | Секрет HMAC-SHA256, не короче 32 байт |
 | `JWT_EXPIRATION_SECONDS` | `3600` | Время жизни JWT в секундах |
 | `JWT_ISSUER` | `booking-service` | Issuer JWT |
-| `HOTELS_BASE_URL` | `http://localhost:8081` | Базовый URL hotels-service |
+| `HOTELS_BASE_URL` | `http://localhost:8082` | Базовый URL hotels-service |
 | `HOTELS_CONNECT_TIMEOUT` | `2s` | Таймаут соединения с hotels-service |
 | `HOTELS_READ_TIMEOUT` | `5s` | Таймаут чтения ответа |
 | `HOTELS_MAX_ATTEMPTS` | `3` | Максимальное число попыток вызова |
@@ -36,7 +37,7 @@
 H2 Console доступна по адресу:
 
 ```text
-http://localhost:8080/h2-console
+http://localhost:8081/h2-console
 ```
 
 Параметры подключения:
@@ -57,8 +58,8 @@ http://localhost:8080/h2-console
 
 | Логин | Пароль | Роль |
 |---|---|---|
-| `admin` | `admin12345` | ADMIN |
-| `user` | `user12345` | USER |
+| `admin` | `admin` | ADMIN |
+| `user` | `user` | USER |
 
 Бронирования:
 
@@ -71,6 +72,28 @@ http://localhost:8080/h2-console
 
 ID детерминированы для чистой in-memory БД. Фактические ID и данные также пишутся в лог при старте.
 
+## Gateway и Eureka
+
+Сервис регистрируется в Eureka и доступен через API Gateway:
+
+| Компонент | Порт | Адрес |
+|---|---|---|
+| Eureka Server | 8761 | `http://localhost:8761` |
+| API Gateway | 8080 | `http://localhost:8080` |
+| booking-service | 8081 | `http://localhost:8081` |
+
+Через Gateway API доступно с префиксом `/booking-service`:
+
+```text
+http://localhost:8080/booking-service/auth
+```
+
+Swagger UI удобнее открывать напрямую на сервисе:
+
+```text
+http://localhost:8081/swagger-ui.html
+```
+
 ## Запуск приложения
 
 ```bash
@@ -81,7 +104,7 @@ gradle bootRun
 
 ```bash
 JWT_SECRET=mySecretKeyForJWTShouldBeLongEnoughAndSecureInProduction \
-HOTELS_BASE_URL=http://localhost:8081 \
+HOTELS_BASE_URL=http://localhost:8082 \
 gradle bootRun
 ```
 
@@ -100,6 +123,18 @@ gradle build
 docker compose up --build
 ```
 
+## Swagger UI
+
+После запуска приложения Swagger UI доступен по адресу:
+
+```text
+http://localhost:8081/swagger-ui.html
+```
+
+Swagger UI загружает контракт напрямую из статического файла `openapi.yml`,
+который приложение отдаёт по `/openapi.yml`. Исходный файл лежит в
+`src/main/resources/static/openapi.yml`.
+
 ## Сборка
 
 ```bash
@@ -107,7 +142,7 @@ gradle build
 ```
 
 Во время сборки:
-- генерируются DTO из `src/main/resources/openapi.yml`;
+- генерируются DTO из `src/main/resources/static/openapi.yml`;
 - запускаются тесты;
 - собирается исполняемый jar в `build/libs/booking-0.0.1-SNAPSHOT.jar`.
 
@@ -138,7 +173,7 @@ HTML-отчёт: `build/reports/tests/test/index.html`.
 gradle openApiGenerate
 ```
 
-- исходный контракт: `src/main/resources/openapi.yml`;
+- исходный контракт: `src/main/resources/static/openapi.yml`;
 - сгенерированные классы: `build/generated/openapi/src/main/java/com/example/booking/model`.
 
 Классы запросов и ответов (`*Dto`) генерируются автоматически, вручную их не редактируем.
@@ -159,42 +194,42 @@ gradle openApiGenerate
 Авторизация демо-пользователя:
 
 ```bash
-curl -s -X POST http://localhost:8080/auth \
+curl -s -X POST http://localhost:8081/auth \
   -H 'Content-Type: application/json' \
-  -d '{"username":"user","password":"user12345"}'
+  -d '{"username":"user","password":"user"}'
 ```
 
 Авторизация администратора:
 
 ```bash
-curl -s -X POST http://localhost:8080/auth \
+curl -s -X POST http://localhost:8081/auth \
   -H 'Content-Type: application/json' \
-  -d '{"username":"admin","password":"admin12345"}'
+  -d '{"username":"admin","password":"admin"}'
 ```
 
 Получить токен и список бронирований:
 
 ```bash
-TOKEN=$(curl -s -X POST http://localhost:8080/auth \
+TOKEN=$(curl -s -X POST http://localhost:8081/auth \
   -H 'Content-Type: application/json' \
-  -d '{"username":"user","password":"user12345"}' \
+  -d '{"username":"user","password":"user"}' \
   | python3 -c 'import sys,json; print(json.load(sys.stdin)["token"])')
 
-curl -s http://localhost:8080/bookings \
+curl -s http://localhost:8081/bookings \
   -H "Authorization: Bearer $TOKEN"
 ```
 
 Получить бронирование по id:
 
 ```bash
-curl -s http://localhost:8080/booking/1 \
+curl -s http://localhost:8081/booking/1 \
   -H "Authorization: Bearer $TOKEN"
 ```
 
 Отменить бронирование:
 
 ```bash
-curl -s -o /dev/null -w '%{http_code}\n' -X DELETE http://localhost:8080/booking/1 \
+curl -s -o /dev/null -w '%{http_code}\n' -X DELETE http://localhost:8081/booking/1 \
   -H "Authorization: Bearer $TOKEN" \
   -H 'X-Request-Id: demo-cancel-1'
 ```
@@ -202,7 +237,7 @@ curl -s -o /dev/null -w '%{http_code}\n' -X DELETE http://localhost:8080/booking
 Регистрация нового пользователя:
 
 ```bash
-curl -s -X POST http://localhost:8080/register \
+curl -s -X POST http://localhost:8081/register \
   -H 'Content-Type: application/json' \
   -d '{"username":"john","password":"secret123"}'
 ```
@@ -210,7 +245,7 @@ curl -s -X POST http://localhost:8080/register \
 Создание бронирования (требуется доступный hotels-service и существующий номер):
 
 ```bash
-curl -s -X POST http://localhost:8080/bookings \
+curl -s -X POST http://localhost:8081/bookings \
   -H 'Content-Type: application/json' \
   -H "Authorization: Bearer $TOKEN" \
   -H 'X-Request-Id: demo-request-1' \
