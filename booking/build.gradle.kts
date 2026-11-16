@@ -78,8 +78,8 @@ dependencies {
 	implementation("org.springframework.cloud:spring-cloud-starter-openfeign")
 
 	implementation("org.springframework.boot:spring-boot-starter-flyway")
-	runtimeOnly("org.flywaydb:flyway-database-postgresql")
-	runtimeOnly("org.postgresql:postgresql")
+	implementation("org.springframework.boot:spring-boot-h2console")
+	runtimeOnly("com.h2database:h2")
 
 	compileOnly("org.projectlombok:lombok")
 	annotationProcessor("org.projectlombok:lombok")
@@ -91,7 +91,6 @@ dependencies {
 	testImplementation("org.springframework.boot:spring-boot-starter-test")
 	testImplementation("org.springframework.boot:spring-boot-starter-webmvc-test")
 	testImplementation("org.springframework.security:spring-security-test")
-	testImplementation("com.h2database:h2")
 	testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 }
 

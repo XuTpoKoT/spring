@@ -1,9 +1,12 @@
 spring:
   datasource:
-    url: jdbc:h2:mem:booking;MODE=PostgreSQL;DB_CLOSE_DELAY=-1;DATABASE_TO_LOWER=TRUE
+    url: jdbc:h2:mem:booking-test;MODE=PostgreSQL;DB_CLOSE_DELAY=-1;DATABASE_TO_LOWER=TRUE
     driver-class-name: org.h2.Driver
     username: sa
     password:
+  h2:
+    console:
+      enabled: false
   jpa:
     hibernate:
       ddl-auto: validate
@@ -11,6 +14,8 @@ spring:
     enabled: true
 
 app:
+  demo:
+    seed-enabled: false
   jwt:
     secret: test-secret-test-secret-test-secret-123456
     expiration-seconds: 3600

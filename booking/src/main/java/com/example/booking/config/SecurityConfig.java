@@ -43,10 +43,12 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
                 .csrf(csrf -> csrf.disable())
+                .headers(headers -> headers.frameOptions(frameOptions -> frameOptions.sameOrigin()))
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/register", "/auth", "/actuator/health").permitAll()
                         .requestMatchers("/actuator/**").permitAll()
+                        .requestMatchers("/h2-console/**").permitAll()
                         .requestMatchers(HttpMethod.POST, "/admin/**").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.GET, "/admin/**").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.DELETE, "/admin/**").hasRole("ADMIN")

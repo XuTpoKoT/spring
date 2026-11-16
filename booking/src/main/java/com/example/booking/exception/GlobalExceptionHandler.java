@@ -13,6 +13,7 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
+import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 import com.example.booking.model.ErrorResponseDto;
 
@@ -61,6 +62,12 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ErrorResponseDto> handleDataIntegrity(DataIntegrityViolationException ex,
                                                                 HttpServletRequest request) {
         return build(HttpStatus.CONFLICT, "Request conflicts with an existing record", request);
+    }
+
+    @ExceptionHandler(NoResourceFoundException.class)
+    public ResponseEntity<ErrorResponseDto> handleNoResource(NoResourceFoundException ex,
+                                                             HttpServletRequest request) {
+        return build(HttpStatus.NOT_FOUND, "Resource not found", request);
     }
 
     @ExceptionHandler(OptimisticLockingFailureException.class)
